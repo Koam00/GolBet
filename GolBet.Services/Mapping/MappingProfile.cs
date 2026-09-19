@@ -1,4 +1,4 @@
-﻿us// GolBet.Services/Mapping/MappingProfile.cs 
+﻿// GolBet.Services/Mapping/MappingProfile.cs 
 
 using AutoMapper;
 

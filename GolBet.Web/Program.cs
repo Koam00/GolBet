@@ -12,47 +12,38 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Open generic registration: one line, a repository for every entity
+builder.Services.AddScoped(
+    typeof(IGenericRepository<>),
+    typeof(GenericRepository<>));
 
-
-// Open generic registration: one line, a repository for every entity 
-
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
-// Specific repositories 
-
+// Specific repositories
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 
-var app = builder.Build();
-
-// AutoMapper: scans the assembly containing MappingProfile for all profiles 
-
+// AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-
-
-// Business services 
-
+// Business services
 builder.Services.AddScoped<IMatchService, MatchService>();
 
-// Seed the database on startup 
+// Build the application
+var app = builder.Build();
 
+// Seed the database on startup
 using (var scope = app.Services.CreateScope())
-
 {
-
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     await DbSeeder.SeedAsync(context);
-
 }
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

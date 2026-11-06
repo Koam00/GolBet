@@ -1,9 +1,11 @@
+using GolBet.Entities;
 using GolBet.Repositories.Data;
 using GolBet.Repositories.Implementations;
 using GolBet.Repositories.Interfaces;
 using GolBet.Services.Implementations;
 using GolBet.Services.Interfaces;
 using GolBet.Services.Mapping;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
@@ -21,6 +23,39 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+
+{
+
+    // Academic-friendly password policy (production would be stricter) 
+
+    options.Password.RequiredLength = 6;
+
+    options.Password.RequireNonAlphanumeric = false;
+
+    options.Password.RequireUppercase = false;
+
+    options.Password.RequireDigit = true;
+
+    options.User.RequireUniqueEmail = true;
+
+})
+
+.AddEntityFrameworkStores<AppDbContext>();
+
+
+
+builder.Services.ConfigureApplicationCookie(options =>
+
+{
+
+    options.LoginPath = "/Account/Login";           // anonymous hitting [Authorize] 
+
+    options.AccessDeniedPath = "/Account/AccessDenied";  // wrong role 
+
+});
 
 // Open generic registration: one line, a repository for every entity
 builder.Services.AddScoped(
@@ -58,6 +93,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
 
 app.UseAuthorization();
 

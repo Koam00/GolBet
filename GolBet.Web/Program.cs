@@ -76,10 +76,19 @@ var app = builder.Build();
 
 // Seed the database on startup
 using (var scope = app.Services.CreateScope())
+
 {
+
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    await DbSeeder.SeedAsync(context);
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+
+
+
+    await DbSeeder.SeedAsync(context, roleManager, userManager);
+
 }
 
 // Configure the HTTP request pipeline.
@@ -94,8 +103,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();   // who are you?  (reads the cookie, builds User) 
 
-app.UseAuthorization();
+app.UseAuthorization();    // may you do this?  (evaluates [Authorize]) 
+
 
 app.MapControllerRoute(
     name: "default",
